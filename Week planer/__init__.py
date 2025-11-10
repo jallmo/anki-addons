@@ -1,11 +1,8 @@
 # __init__.py Connects the add-on to Anki, adds menu actions, and opens the week planner.
 from __future__ import annotations
 import datetime
-from typing import Dict, List
-
 from aqt import mw, gui_hooks  # type: ignore
-from aqt.qt import QAction  # type: ignore
-from aqt.utils import qconnect, tooltip  # type: ignore
+from aqt.utils import tooltip  # type: ignore
 from .config import get_config as _cfg, save_config as _save_cfg
 
 from .deck_panel import inject_panel, on_js_msg, current_plan_snapshot, _refresh_plan_cache
@@ -66,68 +63,6 @@ def _add_deck_to_today(did: int) -> None:
     except Exception:
         pass
 
-
-
-def show_week_view() -> None:
-    from .week_view import WeekBoard
-    WeekBoard(mw).show()
-
-
-def study_planned_today() -> None:
-    """Menu action: build 'Planned Today' and open it in Review."""
-    today_iso = datetime.date.today().isoformat()
-    plan = current_plan_snapshot()
-    deck_ids: List[int] = []
-    if isinstance(plan, list):
-        for row in plan:
-            if not isinstance(row, dict):
-                continue
-            if row.get("iso") != today_iso:
-                continue
-            try:
-                did_int = int(row.get("did"))
-            except Exception:
-                continue
-            deck_ids.append(did_int)
-    elif isinstance(plan, dict):
-        # legacy fallback for older config shapes
-        for did_str, entry in plan.items():
-            if not str(did_str).isdigit():
-                continue
-            if isinstance(entry, dict):
-                dates = entry.get("dates", {})
-                if today_iso in dates:
-                    deck_ids.append(int(did_str))
-            elif isinstance(entry, list):
-                today_label = DAYS[datetime.datetime.now().weekday()]
-                if today_label in entry:
-                    deck_ids.append(int(did_str))
-    if not deck_ids:
-        return
-
-    col = mw.col
-    names = [col.decks.name(d) for d in deck_ids if col.decks.name(d)]
-    if not names:
-        return
-
-    search = "(" + " or ".join(f'deck:"{n}"' for n in names) + ") is:due"
-    did = col.decks.id("Planned Today")
-    d = col.decks.get(did)
-    d["dyn"] = True
-    col.decks.save(d)
-    col.sched.rebuild_filtered_deck(did, search=search, resched=False, limit=999999)
-
-    mw.col.decks.select(did)
-    mw.reset()
-    try:
-        mw.moveToState("review")
-    except Exception:
-        try:
-            mw.moveToState("overview")
-        except Exception:
-            pass
-
-
 def _on_profile_open() -> None:
     # prevent double-registration on profile reload
     if getattr(mw, "_week_planner_init_done", False):
@@ -139,15 +74,6 @@ def _on_profile_open() -> None:
     except Exception:
         pass
     
-    # Tools menu
-    act_week = QAction("Week View", mw)
-    qconnect(act_week.triggered, show_week_view)
-    mw.form.menuTools.addAction(act_week)
-
-    act_today = QAction("Study Planned Today", mw)
-    qconnect(act_today.triggered, study_planned_today)
-    mw.form.menuTools.addAction(act_today)
-
     # Decks screen panel + JS bridge
     gui_hooks.deck_browser_did_render.append(inject_panel)
     gui_hooks.webview_did_receive_js_message.append(on_js_msg)
