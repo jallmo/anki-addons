@@ -1,4 +1,4 @@
-# __init__.py Connects the add-on to Anki, adds menu actions, and opens the week planner.
+    # __init__.py Connects the add-on to Anki, adds menu actions, and opens the week planner.
 from __future__ import annotations
 import datetime
 from aqt import mw, gui_hooks  # type: ignore
