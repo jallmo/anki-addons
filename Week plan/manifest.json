@@ -1,0 +1,11 @@
+{
+    "name": "Week Planner",
+    "package": "week_planner",
+    "ankiweb_id": null,
+    "author": "James Morris",
+    "version": "v0.1.0",
+    "homepage": "https://github.com/jamesmorris/week-planner",
+    "conflicts": [],
+    "mod": 1730565600,
+    "min_point_version": 66
+}
