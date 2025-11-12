@@ -10,6 +10,7 @@ from aqt.utils import showInfo  # type: ignore
 from .config import get_config as _cfg, save_config as _save_cfg
 
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+VISIBLE_DAYS = 5
 
 PlanEntry = Dict[str, Any]
 
@@ -52,11 +53,9 @@ def _iso_dates_from_today(k: int) -> List[str]:
     base = _today_date()
     return [_iso(base + datetime.timedelta(days=i)) for i in range(max(1, int(k)))]
 
-def _current_week_bounds(date_obj: datetime.date | None = None) -> Tuple[datetime.date, datetime.date]:
-    """Return (start, end) covering the visible Monday–Friday window."""
-    start = _week_start(date_obj)
-    end = start + datetime.timedelta(days=4)
-    return start, end
+def _visible_iso_window(size: int = VISIBLE_DAYS) -> List[str]:
+    """Return the ISO date strings that match the current UI window (today + size-1)."""
+    return _iso_dates_from_today(size)
 
 def _weekday_label_to_iso(label: str, base_week: datetime.date | None = None) -> str | None:
     label = (label or "").strip()[:3].title()
@@ -117,8 +116,8 @@ def _canonicalize_plan(entries: List[PlanEntry]) -> Tuple[List[PlanEntry], bool]
     return canonical, changed
 
 def _filter_plan_to_current_week(entries: List[PlanEntry]) -> Tuple[List[PlanEntry], bool]:
-    """Drop plan rows that fall outside the currently visible week."""
-    start, end = _current_week_bounds()
+    """Drop plan rows that fall outside the five-day window shown in the UI."""
+    visible_isos = set(_visible_iso_window())
     kept: List[PlanEntry] = []
     changed = False
     for row in entries:
@@ -129,12 +128,7 @@ def _filter_plan_to_current_week(entries: List[PlanEntry]) -> Tuple[List[PlanEnt
         if not isinstance(iso, str) or not _valid_iso_date(iso):
             changed = True
             continue
-        try:
-            iso_date = datetime.date.fromisoformat(iso)
-        except Exception:
-            changed = True
-            continue
-        if start <= iso_date <= end:
+        if iso in visible_isos:
             kept.append(row)
         else:
             changed = True
