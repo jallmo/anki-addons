@@ -75,10 +75,10 @@
     const indicatorColor = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(17,17,17,0.18)';
 
     st.textContent = `
-      #wp-wrap{margin:12px 0;padding:12px 16px 16px;border:1px solid ${frameBorder};border-radius:12px;background:${panelBg};color:${textColor};font-size:13px;}
+      #wp-wrap{margin:12px 0;padding:12px 16px 16px;border:1px solid ${frameBorder};border-radius:12px;background:${panelBg};color:${textColor};font-size:13px;overflow:hidden;}
       .wp-btn{padding:4px 10px;border:1px solid ${frameBorder};border-radius:8px;background:${buttonBg};cursor:pointer;font-size:12px;transition:background .12s;}
       .wp-btn:hover{background:${buttonHover};}
-      #planner-grid{display:grid;grid-template-columns:repeat(5,minmax(220px,1fr));gap:24px;align-items:start;margin-top:0;}
+      #planner-grid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:24px;align-items:start;margin-top:0;}
       .cell{background:${panelBg};border:1px solid transparent;border-radius:0;display:flex;flex-direction:column;min-height:160px;}
       .cell.today .cell-date{color:${accent};}
       .cell.today .cell-header{border-bottom-color:${accent};}
@@ -156,9 +156,100 @@
     return 0;
   });
 
+  const MAX_VISIBLE_DAYS = 5;
+  const MIN_CELL_WIDTH = 220;
+  const GRID_GAP = 24;
+
   const STATE = {
-    anchorIso: TODAY_ISO
+    anchorIso: TODAY_ISO,
+    visibleCount: MAX_VISIBLE_DAYS,
+    visibleIsos: []
   };
+
+  function clampVisibleCount(value) {
+    return Math.max(1, Math.min(MAX_VISIBLE_DAYS, value || 1));
+  }
+
+  function countForWidth(width) {
+    if (!Number.isFinite(width) || width <= 0) {
+      return MAX_VISIBLE_DAYS;
+    }
+    const perCell = MIN_CELL_WIDTH + GRID_GAP;
+    const approx = Math.floor((width + GRID_GAP) / perCell);
+    return clampVisibleCount(approx);
+  }
+
+  function measuredPlannerWidth() {
+    const measure = (el) => {
+      if (!el || typeof el.getBoundingClientRect !== 'function') {
+        return 0;
+      }
+      const rect = el.getBoundingClientRect();
+      return rect && Number.isFinite(rect.width) ? rect.width : 0;
+    };
+    return (
+      measure(plannerGrid) ||
+      measure(wrap) ||
+      measure(container) ||
+      Math.max(window.innerWidth || 0, 0)
+    );
+  }
+
+  function debounce(fn, ms) {
+    let timer = null;
+    return function debounced(...args) {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(function() {
+        timer = null;
+        fn.apply(null, args);
+      }, ms);
+    };
+  }
+
+  function applyVisibleCount(nextCount) {
+    const clamped = clampVisibleCount(nextCount);
+    if (clamped !== STATE.visibleCount) {
+      STATE.visibleCount = clamped;
+      renderWeekView();
+    }
+  }
+
+  const handleResize = debounce(function(widthValue) {
+    const width = Number.isFinite(widthValue) ? widthValue : measuredPlannerWidth();
+    const next = countForWidth(width);
+    applyVisibleCount(next);
+  }, 120);
+
+  STATE.visibleCount = countForWidth(measuredPlannerWidth());
+
+  if (window.__wpResizeObserver && typeof window.__wpResizeObserver.disconnect === 'function') {
+    try {
+      window.__wpResizeObserver.disconnect();
+    } catch (err) {
+      // ignore cleanup errors
+    }
+  }
+  if (window.ResizeObserver) {
+    const observer = new ResizeObserver(function(entries) {
+      const entry = entries && entries[0];
+      const width = entry && entry.contentRect ? entry.contentRect.width : undefined;
+      handleResize(width);
+    });
+    if (plannerGrid) {
+      observer.observe(plannerGrid);
+    }
+    window.__wpResizeObserver = observer;
+  }
+
+  if (window.__wpResizeHandler) {
+    window.removeEventListener('resize', window.__wpResizeHandler);
+  }
+  window.__wpResizeHandler = function() {
+    handleResize(measuredPlannerWidth());
+  };
+  window.addEventListener('resize', window.__wpResizeHandler);
 
   const formatterWeekday = new Intl.DateTimeFormat(undefined, { weekday: 'short' });
   const formatterDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' });
@@ -248,13 +339,18 @@
     return result;
   }
 
-  function currentWeekDates() {
+  function dateRangeFromAnchor(count) {
+    const limit = clampVisibleCount(Number(count) || STATE.visibleCount || MAX_VISIBLE_DAYS);
     const start = parseISO(STATE.anchorIso || TODAY_ISO);
     const dates = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < limit; i++) {
       dates.push(isoFromDate(addDays(start, i)));
     }
     return dates;
+  }
+
+  function currentWeekDates() {
+    return dateRangeFromAnchor(STATE.visibleCount);
   }
 
   function decksForIso(iso) {
@@ -346,34 +442,30 @@
 
   function targetIsoForDelta(iso, delta) {
     if (!iso || !Number.isFinite(delta) || delta === 0) {
+      return iso;
+    }
+    const list = Array.isArray(STATE.visibleIsos) ? STATE.visibleIsos : [];
+    if (!list.length) {
       return null;
     }
-    const date = parseISO(iso);
-    const weekday = date.getDay();
-    if (delta < 0) {
-      if (weekday === 1 && !WRAP_ARROWS) {
+    const currentIndex = list.indexOf(iso);
+    if (currentIndex === -1) {
+      return null;
+    }
+    let nextIndex = currentIndex + delta;
+    const lastIndex = list.length - 1;
+    if (nextIndex < 0 || nextIndex > lastIndex) {
+      if (!WRAP_ARROWS) {
         return null;
       }
-      if (weekday === 1 && WRAP_ARROWS) {
-        return isoFromDate(addDays(date, -1));
-      }
-      return isoFromDate(addDays(date, delta));
+      nextIndex = ((nextIndex % list.length) + list.length) % list.length;
     }
-    if (delta > 0) {
-      if (weekday === 0 && !WRAP_ARROWS) {
-        return null;
-      }
-      if (weekday === 0 && WRAP_ARROWS) {
-        return TODAY_ISO;
-      }
-      return isoFromDate(addDays(date, delta));
-    }
-    return iso;
+    return list[nextIndex] || null;
   }
 
   function shiftHighestDeck(iso, delta) {
     const targetIso = targetIsoForDelta(iso, delta);
-    if (!targetIso || targetIso === iso) {
+    if (!targetIso || targetIso === iso || !cells.has(targetIso)) {
       return;
     }
     const groups = groupFromList(PLAN);
@@ -406,6 +498,7 @@
     plannerGrid.innerHTML = '';
     cells.clear();
     const dates = currentWeekDates();
+    STATE.visibleIsos = dates.slice();
     dates.forEach(function(iso) {
       const cell = document.createElement('div');
       cell.className = 'cell';
