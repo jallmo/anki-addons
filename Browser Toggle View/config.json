@@ -1,0 +1,8 @@
+{
+    "question_column_header": "Question",
+    "answer_column_header": "Answer",
+    "question_field_name": "",
+    "answer_field_name": "",
+    "max_rows": 250,
+    "hotkey_toggle_document_view": "Alt+4"
+}

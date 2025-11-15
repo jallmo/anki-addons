@@ -1,0 +1,470 @@
+<style>
+        :root {
+            color-scheme: light dark;
+            --smw-glass-top: rgba(255, 255, 255, 0.92);
+            --smw-glass-bottom: rgba(255, 255, 255, 0.65);
+            --smw-glass-fill: rgba(255, 255, 255, 0.35);
+            --smw-shadow-base: 0 18px 45px rgba(15, 23, 42, 0.16);
+            --smw-shadow-hover: 0 28px 60px rgba(15, 23, 42, 0.25);
+            --smw-gutter: 12px;
+            --smw-radius: 18px;
+            --smw-padding-y: 14px;
+            --smw-padding-x: 20px;
+            --smw-card-width: 920px;
+            --smw-blur: 22px;
+            --smw-body-bg: #f4f4f4;
+            --smw-body-text: #0b1526;
+            --smw-muted-text: rgba(11, 21, 38, 0.66);
+            --smw-marker: rgba(59, 72, 94, 0.6);
+            --smw-marker-active: rgba(70, 110, 255, 0.95);
+            --smw-highlight: rgba(99, 102, 241, 0.16);
+            --smw-divider: rgba(11, 21, 38, 0.12);
+            --smw-card-border: rgba(255, 255, 255, 0.7);
+            --smw-marker-size: 30px;
+            --smw-image-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+        }
+
+        body {
+            font-family: "SF Pro Text", "Helvetica Neue", sans-serif;
+            padding: 32px 24px 40px;
+            font-size: 20px;
+            margin: 0;
+            background: var(--smw-body-bg);
+            color: var(--smw-body-text);
+        }
+
+        #docview-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--smw-gutter);
+            width: 100%;
+            max-width: var(--smw-card-width);
+            margin: 0 auto;
+        }
+
+        #docview-footer {
+            width: 100%;
+            max-width: var(--smw-card-width);
+            margin: 18px auto 0;
+            font-size: 13px;
+            color: var(--smw-muted-text);
+            text-align: center;
+        }
+
+        .apple-glass {
+            border-radius: var(--smw-radius);
+            background: linear-gradient(145deg, var(--smw-glass-top), var(--smw-glass-bottom));
+            box-shadow: var(--smw-shadow-base);
+            backdrop-filter: blur(var(--smw-blur));
+            -webkit-backdrop-filter: blur(var(--smw-blur));
+            border: 1px solid var(--smw-card-border);
+            transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+            filter 0.35s ease,
+            box-shadow 0.35s ease,
+            background 0.35s ease,
+            border-color 0.35s ease;
+        }
+
+        .docview-toggle {
+            margin-bottom: 0;
+            padding: 0;
+            outline: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .docview-toggle.apple-glass:hover {
+            transform: translateY(-2px) scale(1.005);
+            filter: brightness(1.05) saturate(1.05);
+            box-shadow: var(--smw-shadow-hover);
+        }
+
+        .docview-toggle.apple-glass:active {
+            transform: scale(0.98);
+            filter: brightness(0.97);
+        }
+
+        .docview-toggle[selected] {
+            box-shadow: 0 0 0 1px var(--smw-highlight), var(--smw-shadow-hover);
+            outline: none;
+        }
+
+        .toggle-header {
+            cursor: pointer;
+            font-weight: 600;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: var(--smw-padding-y) var(--smw-padding-x) 0;
+        }
+
+        .toggle-header .text {
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        .toggle-header .text img {
+            max-width: 100%;
+            max-height: 50%;
+            height: auto;
+            display: block;
+            margin: 8px 0;
+            border-radius: 10px;
+            box-shadow: var(--smw-image-shadow);
+            object-fit: contain;
+        }
+
+        .toggle-marker {
+            width: var(--smw-marker-size);
+            height: var(--smw-marker-size);
+            border-radius: 12px;
+            background: var(--smw-glass-fill);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.35s ease, background 0.35s ease;
+        }
+
+        .toggle-marker::before {
+            content: '';
+            width: 0;
+            height: 0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 7px solid var(--smw-marker);
+            transition: border-left-color 0.35s ease;
+        }
+
+        .docview-toggle[data-open="true"] .toggle-marker {
+            transform: rotate(90deg);
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .docview-toggle[data-open="true"] .toggle-marker::before {
+            border-left-color: var(--smw-marker-active);
+        }
+
+        .toggle-body {
+            display: none;
+            padding: 0 var(--smw-padding-x) var(--smw-padding-y) 12px;
+            margin-left: calc(var(--smw-padding-x) + var(--smw-marker-size) + 12px);
+            color: var(--smw-muted-text);
+            line-height: 1.65;
+            border-left: 1px solid var(--smw-divider);
+        }
+
+        .docview-toggle[data-open="true"] .toggle-body {
+            display: block;
+        }
+
+        .toggle-body img {
+            max-width: 100%;
+            max-height: 50%;
+            height: auto;
+            display: block;
+            margin: 12px 0;
+            border-radius: 12px;
+            box-shadow: var(--smw-image-shadow);
+            object-fit: contain;
+        }
+</style>
+
+<div id="docview-container"></div>
+<div id="docview-footer"></div>
+
+<script>
+        const DOCVIEW_DATA = __DOCVIEW_DATA__;
+        const meta = (DOCVIEW_DATA && DOCVIEW_DATA.meta) ? DOCVIEW_DATA.meta : {};
+        let currentIndex = -1;
+        let totalEntries = 0;
+
+        const docviewContainer = document.getElementById('docview-container');
+        const footer = document.getElementById('docview-footer');
+        const COLOR_SCHEME_MEDIA = window.matchMedia
+            ? window.matchMedia('(prefers-color-scheme: dark)')
+            : null;
+        const THEME_TOKENS = {
+            light: {
+                '--smw-body-bg': '#f4f4f4',
+                '--smw-body-text': '#0b1526',
+                '--smw-muted-text': 'rgba(11, 21, 38, 0.66)',
+                '--smw-glass-top': 'rgba(255, 255, 255, 0.92)',
+                '--smw-glass-bottom': 'rgba(255, 255, 255, 0.65)',
+                '--smw-glass-fill': 'rgba(255, 255, 255, 0.35)',
+                '--smw-shadow-base': '0 18px 45px rgba(15, 23, 42, 0.16)',
+                '--smw-shadow-hover': '0 28px 60px rgba(15, 23, 42, 0.25)',
+                '--smw-card-border': 'rgba(255, 255, 255, 0.7)',
+                '--smw-marker': 'rgba(59, 72, 94, 0.6)',
+                '--smw-marker-active': 'rgba(70, 110, 255, 0.95)',
+                '--smw-highlight': 'rgba(99, 102, 241, 0.16)',
+                '--smw-divider': 'rgba(11, 21, 38, 0.12)',
+                '--smw-image-shadow': '0 12px 30px rgba(15, 23, 42, 0.18)'
+            },
+            dark: {
+                '--smw-body-bg': '#0f121a',
+                '--smw-body-text': 'rgba(246, 248, 255, 0.92)',
+                '--smw-muted-text': 'rgba(235, 240, 255, 0.7)',
+                '--smw-glass-top': 'rgba(32, 37, 52, 0.9)',
+                '--smw-glass-bottom': 'rgba(18, 20, 32, 0.78)',
+                '--smw-glass-fill': 'rgba(255, 255, 255, 0.08)',
+                '--smw-shadow-base': '0 18px 45px rgba(0, 0, 0, 0.55)',
+                '--smw-shadow-hover': '0 30px 60px rgba(0, 0, 0, 0.65)',
+                '--smw-card-border': 'rgba(255, 255, 255, 0.08)',
+                '--smw-marker': 'rgba(235, 240, 255, 0.65)',
+                '--smw-marker-active': 'rgba(124, 162, 255, 0.95)',
+                '--smw-highlight': 'rgba(124, 162, 255, 0.18)',
+                '--smw-divider': 'rgba(255, 255, 255, 0.09)',
+                '--smw-image-shadow': '0 12px 30px rgba(0, 0, 0, 0.65)'
+            }
+        };
+
+        const isDarkMode = () => {
+            const metaFlag = !!meta.nightMode;
+            const mediaFlag = COLOR_SCHEME_MEDIA ? COLOR_SCHEME_MEDIA.matches : false;
+            return metaFlag || mediaFlag;
+        };
+
+        function ensureThemeStyles() {
+            const palette = isDarkMode() ? THEME_TOKENS.dark : THEME_TOKENS.light;
+            const rootStyle = document.documentElement.style;
+            Object.entries(palette).forEach(([token, value]) => {
+                rootStyle.setProperty(token, value);
+            });
+        }
+
+        function attachThemeListeners() {
+            if (COLOR_SCHEME_MEDIA && !window.__docviewColorSchemeListener) {
+                COLOR_SCHEME_MEDIA.addEventListener('change', () => ensureThemeStyles());
+                window.__docviewColorSchemeListener = true;
+            }
+        }
+
+        function safeEntries() {
+            if (DOCVIEW_DATA && Array.isArray(DOCVIEW_DATA.entries)) {
+                return DOCVIEW_DATA.entries;
+            }
+            return [];
+        }
+
+        function getToggles() {
+            return Array.from(document.getElementsByClassName('docview-toggle'));
+        }
+
+        function updateFooter() {
+            if (meta.truncated) {
+                const remaining = Math.max(0, (meta.total || 0) - (meta.shown || 0));
+                footer.innerHTML = `<p><em>Showing first ${meta.shown} of ${meta.total} rows. Increase 'max_rows' to load remaining ${remaining}.</em></p>`;
+            } else {
+                footer.innerHTML = "";
+            }
+        }
+
+        function updateOpenState(cardId, isOpen) {
+            if (!cardId || typeof pycmd !== "function") return;
+            pycmd('DOCVIEW_OPEN:' + cardId + ':' + (isOpen ? '1' : '0'));
+        }
+
+        function setToggleOpen(toggle, open, { notify = false } = {}) {
+            if (!toggle) return;
+            if (open) {
+                toggle.setAttribute('data-open', 'true');
+            } else {
+                toggle.removeAttribute('data-open');
+            }
+            if (notify) {
+                updateOpenState(toggle.dataset.card, open);
+            }
+        }
+
+        function buildToggle(entry, index) {
+            const toggle = document.createElement('div');
+            toggle.className = 'docview-toggle apple-glass notion-toggle';
+            toggle.dataset.row = entry.row;
+            toggle.dataset.index = index;
+            toggle.dataset.card = entry.cardId || "";
+            toggle.dataset.note = entry.noteId || "";
+            toggle.dataset.answerField = entry.answerField || "";
+            toggle.dataset.questionField = entry.questionField || "";
+            toggle.dataset.answerHtml = entry.answerHtml || "";
+            toggle.dataset.questionHtml = entry.questionHtml || "";
+            if (entry.isOpen) {
+                toggle.setAttribute('data-open', 'true');
+            }
+
+            const summary = document.createElement('div');
+            summary.className = 'summary toggle-header';
+
+            const marker = document.createElement('span');
+            marker.className = 'marker toggle-marker';
+
+            const text = document.createElement('span');
+            text.className = 'text';
+            text.innerHTML = entry.questionHtml || "(empty question)";
+
+            summary.appendChild(marker);
+            summary.appendChild(text);
+
+            const answer = document.createElement('div');
+            answer.className = 'answer toggle-body';
+            answer.innerHTML = entry.answerHtml || "—";
+
+            toggle.appendChild(summary);
+            toggle.appendChild(answer);
+            return toggle;
+        }
+
+        function renderEntries() {
+            docviewContainer.innerHTML = "";
+            const entries = safeEntries();
+            entries.forEach((entry, index) => {
+                docviewContainer.appendChild(buildToggle(entry, index));
+            });
+            totalEntries = entries.length;
+            updateFooter();
+        }
+
+        function highlight(index, { ensureOpen = false, scrollIntoView = true } = {}) {
+            const toggles = getToggles();
+            toggles.forEach((el, i) => {
+                if (i === index) {
+                    el.setAttribute('selected', '');
+                    if (ensureOpen) {
+                        // open the selected one
+                        setToggleOpen(el, true, { notify: true });
+                    }
+                    if (scrollIntoView) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    currentIndex = i;
+                } else {
+                    el.removeAttribute('selected');
+                    // if we want only one open, close all others
+                    if (ensureOpen && el.getAttribute('data-open') === 'true') {
+                        setToggleOpen(el, false, { notify: true });
+                    }
+                }
+            });
+        }
+
+        function selectRow(row, index, options = {}) {
+            highlight(index, { ensureOpen: options.ensureOpen });
+            if (typeof pycmd === "function") {
+                pycmd('DOCVIEW_SELECT:' + row);
+            }
+        }
+
+        function moveSelection(delta) {
+            const toggles = getToggles();
+            totalEntries = toggles.length;
+            if (totalEntries <= 0) return;
+
+            if (currentIndex === -1) {
+                currentIndex = delta >= 0 ? 0 : totalEntries - 1;
+            } else {
+                currentIndex = Math.max(0, Math.min(totalEntries - 1, currentIndex + delta));
+            }
+
+            const el = toggles[currentIndex];
+            if (el) {
+                const row = parseInt(el.dataset.row, 10);
+                if (!Number.isNaN(row)) {
+                    selectRow(row, currentIndex, { ensureOpen: true });
+                }
+            }
+        }
+
+        // Keyboard: Up/Down move selection, Enter starts inline editor
+        document.addEventListener('keydown', event => {
+            if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'a') {
+                if (typeof pycmd === "function") {
+                    pycmd("DOCVIEW_SELECT_ALL");
+                }
+                event.preventDefault();
+                return;
+            }
+
+            if (event.key === 'ArrowDown' && !event.metaKey && !event.ctrlKey) {
+                if (typeof pycmd === "function") {
+                    pycmd("DOCVIEW_FORCE_TABLE_ONLY");
+                }
+                moveSelection(1);
+                event.preventDefault();
+                return;
+            }
+            if (event.key === 'ArrowUp') {
+                moveSelection(-1);
+                event.preventDefault();
+                return;
+            }
+            if (!editingState && event.key === 'Enter' && !event.shiftKey && !event.metaKey && !event.ctrlKey) {
+                const targetIndex = currentIndex >= 0 ? currentIndex : 0;
+                startEditingFull(targetIndex, 'back');
+                event.preventDefault();
+            }
+        });
+
+        // Single click: toggle open/closed + sync selection
+        document.addEventListener('click', event => {
+            const targetToggle = event.target.closest('.docview-toggle');
+            if (!targetToggle) return;
+
+            const row = parseInt(targetToggle.dataset.row, 10);
+            const idx = parseInt(targetToggle.dataset.index, 10);
+            if (Number.isNaN(row) || Number.isNaN(idx)) return;
+
+            const summary = event.target.closest('.summary');
+            let isOpen = targetToggle.getAttribute('data-open') === 'true';
+            if (summary) {
+                const nextState = !isOpen;
+                setToggleOpen(targetToggle, nextState, { notify: true });
+                isOpen = nextState;
+            }
+            selectRow(row, idx, { ensureOpen: isOpen });
+        }, { capture: true });
+
+// Double click: open + select + inline edit
+        document.addEventListener('dblclick', event => {
+            const targetToggle = event.target.closest('.docview-toggle');
+            if (!targetToggle) return;
+
+            const row = parseInt(targetToggle.dataset.row, 10);
+            const idx = parseInt(targetToggle.dataset.index, 10);
+            if (Number.isNaN(row) || Number.isNaN(idx)) return;
+
+            setToggleOpen(targetToggle, true, { notify: true });
+            selectRow(row, idx, { ensureOpen: true });
+            const clickedAnswer = event.target.closest('.answer');
+            startEditingFull(idx, clickedAnswer ? 'back' : 'front');
+            event.preventDefault();
+        });
+
+        document.addEventListener('contextmenu', event => {
+            const toggle = event.target.closest('.docview-toggle');
+            if (!toggle || typeof pycmd !== "function") {
+                return;
+            }
+            const row = parseInt(toggle.dataset.row, 10);
+            if (!Number.isNaN(row)) {
+                pycmd("DOCVIEW_CONTEXT:" + row);
+                event.preventDefault();
+            }
+        }, { capture: true });
+
+        const initTheme = () => {
+            ensureThemeStyles();
+            attachThemeListeners();
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                initTheme();
+                renderEntries();
+            });
+        } else {
+            initTheme();
+            renderEntries();
+        }
+    </script>
