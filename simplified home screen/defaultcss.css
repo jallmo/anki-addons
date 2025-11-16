@@ -1,0 +1,463 @@
+ :root {
+  --smw-max-content-width: 80%;
+  --smw-gutter: 24px;
+  --smw-centered-width:75vw;
+  --smw-glow: rgba(42, 98, 153, 0.25);
+  --smw-body-bg: var(--frame-bg, #f7f7f7);
+  --smw-glass-top: rgba(255, 255, 255, 0.95);
+  --smw-glass-bottom: rgba(255, 255, 255, 0.65);
+  --smw-glass-fill: rgba(255, 255, 255, 0.75);
+  --smw-glass-border: rgba(0, 0, 0, 0.08);
+  --smw-shadow-outer: rgba(15, 15, 15, 0.12);
+  --smw-shadow-inner: rgba(255, 255, 255, 0.8);
+  --smw-shadow-base: rgba(15, 15, 15, 0.08);
+  --smw-shadow-hover: rgba(15, 15, 15, 0.12);
+  --smw-toggle-bg: rgba(0, 0, 0, 0.05);
+  --smw-toggle-border: rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 960px) {
+  :root {
+    --smw-gutter: 16px;
+  }
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--smw-body-bg);
+  color: var(--smw-text-color);
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+}
+
+body.nightMode {
+  --smw-glass-top: rgba(255, 255, 255, 0.15);
+  --smw-glass-bottom: rgba(255, 255, 255, 0.04);
+  --smw-glass-fill: rgba(32, 32, 32, 0.85);
+  --smw-glass-border: rgba(255, 255, 255, 0.12);
+  --smw-shadow-outer: rgba(0, 0, 0, 0.45);
+  --smw-shadow-inner: rgba(255, 255, 255, 0.18);
+  --smw-shadow-base: rgba(0, 0, 0, 0.4);
+  --smw-shadow-hover: rgba(0, 0, 0, 0.55);
+  --smw-toggle-bg: rgba(255, 255, 255, 0.05);
+  --smw-toggle-border: rgba(255, 255, 255, 0.16);
+  --smw-body-bg: var(--frame-bg, #2b2b2b);
+  --smw-text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+/* REMOVE CENTERED LAYOUT ONLY FROM THE MAIN DECK TREE */
+center#deckTree {
+  display: block !important;
+  text-align: left !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* MAKE THE HOME TABLE CENTERED WITHOUT TOUCHING OTHER CENTER ELEMENTS */
+center#deckTree > table {
+  width: var(--smw-centered-width) !important;
+  max-width: var(--smw-centered-width) !important;
+  margin: 32px auto !important;
+  padding: 0 !important;
+  table-layout: fixed !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* MAKE EACH DECK ROW FULL WIDTH */
+center > table tr.deck td.decktd {
+  width: var(--smw-centered-width) !important;
+  max-width: var(--smw-centered-width) !important;
+}
+
+/* --- HOME SCREEN FULL WIDTH --- */
+.page,
+.deck-overview {
+  width: var(--smw-centered-width) !important;
+  max-width: var(--smw-centered-width) !important;
+  margin: 0 auto !important;
+  padding: 0 var(--smw-gutter) !important;
+  box-sizing: border-box;
+}
+
+.deck-overview .deck {
+  width: 100% !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+.deck-overview .deck button,
+.deck-overview .deck .decklist {
+  width: 100% !important;
+}
+
+/* Stretch the home screen deck list to the edges */
+.deck-list {
+  width: var(--smw-centered-width) !important;
+  max-width: var(--smw-centered-width) !important;
+  margin: 0 auto !important;
+  padding: 0 var(--smw-gutter) !important;
+  box-sizing: border-box;
+}
+
+/* Make each dashboard deck tile span the full width */
+.deck-list .deck {
+  width: 100% !important;
+  max-width: 100% !important;
+  border-radius: 0 !important;
+}
+
+/* Remove Anki's centered wrapper so everything can stretch */
+body .centered {
+  width: var(--smw-centered-width) !important;
+  max-width: var(--smw-centered-width) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: var(--smw-gutter) !important;
+  padding-right: var(--smw-gutter) !important;
+  box-sizing: border-box;
+}
+
+#deckTree,
+center#deckTree {
+  display: block;
+  width: var(--smw-centered-width) !important;
+  max-width: var(--smw-centered-width) !important;
+  margin: 0 auto !important;
+  padding: 0 var(--smw-gutter) !important;
+  box-sizing: border-box;
+}
+
+/* Nukes ALL container shadows/rounding/masks that cause dark corners */
+table.deckTable,
+center#deckTree > table,
+tr.deck,
+tr.deck.current,
+td.decktd,
+tr.ios-row,
+.ios-row,
+.decklist,
+.decklist > div {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-mask: none !important;
+  mask: none !important;
+}
+
+/* Remove the ghost rounded corners Anki adds */
+table.deckTable {
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+
+td.decktd {
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+
+table.deckTable,
+center#deckTree > table {
+  width: var(--smw-centered-width) !important;
+  max-width: var(--smw-centered-width) !important;
+  margin: 0 auto !important;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+  border-radius: 28px;
+  border: none;
+  box-sizing: border-box;
+  table-layout: fixed;
+}
+
+tr.top-level-drag-row {
+  display: none;
+}
+
+tr.deck,
+tr.ios-row {
+  background: transparent !important;
+}
+
+td.decktd {
+  padding:0 !important;      /* equal top + bottom space */
+  border-bottom: none !important;  /* remove the thin divider */
+  background: transparent !important;
+}
+
+tr.deck:last-child td.decktd {
+  border-bottom: none;
+}
+
+tr.deck.current td.decktd,
+tr.deck:hover td.decktd {
+  background: var(--smw-card-bg) !important;
+}
+
+tr.deck td.decktd {
+  background: transparent !important;
+}
+
+/* Remove the Anki background + shadows from all deck rows */
+tr.deck td.decktd,
+tr.deck.current td.decktd,
+tr.deck:hover td.decktd {
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+.ios-row,
+.ios-row-card,
+.apple-glass {
+  background-color: transparent !important;
+}
+
+.ios-row-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  position: relative;
+}
+
+.ios-row-card.ios-row-hover {
+  transform: translateX(4px);
+}
+
+.apple-glass {
+  position: relative;
+  border-radius: 18px;
+  padding: 14px 20px;
+  background:
+    linear-gradient(
+      to bottom,
+      var(--smw-glass-top),
+      var(--smw-glass-bottom)
+    ),
+    var(--smw-glass-fill);
+  backdrop-filter: blur(30px) saturate(170%);
+  border: 1px solid var(--smw-glass-border);
+  box-shadow:
+    0 6px 16px var(--smw-shadow-base),
+    inset 0 1px 0 var(--smw-shadow-inner);
+  transition:
+    transform 0.55s cubic-bezier(0.25, 1.50, 0.35, 1.00),
+    box-shadow 0.35s cubic-bezier(0.25, 1.0, 0.25, 1.0),
+    background 0.35s ease,
+    filter 0.35s ease;
+  overflow: visible;
+}
+
+.apple-glass:hover {
+  transform: translateY(-2px) scale(1.005);
+  filter: brightness(1.05) saturate(1.05);
+  box-shadow:
+    0 12px 22px var(--smw-shadow-hover),
+    0 0 18px rgba(255, 255, 255, 0.12) inset;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.98),
+      rgba(255, 255, 255, 0.75)
+    );
+}
+
+.apple-glass:active {
+  transform: translateY(0) scale(0.98);
+  filter: brightness(0.97);
+  box-shadow:
+    0 6px 14px var(--smw-shadow-base),
+    0 0 10px rgba(255, 255, 255, 0.1) inset;
+}
+
+.ios-row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ios-row-name,
+.ios-row-name:link,
+.ios-row-name:visited,
+.ios-row-name:hover,
+.ios-row-name:active,
+.ios-row-name:focus {
+  flex: 1;
+  display: inline-flex;
+  color: inherit;
+  text-decoration: none !important;
+}
+
+.ios-row-name-text {
+  font-size: 17px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--smw-text-color) !important;
+  text-shadow: var(--smw-text-shadow, 0 1px 1px rgba(0, 0, 0, 0.15));
+}
+
+.filtered .ios-row-name-text {
+  color: var(--smw-text-color) !important;
+}
+
+.ios-collapse-wrapper .collapse {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--smw-toggle-border);
+  background: var(--smw-toggle-bg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--smw-accent-color);
+  font-size: 16px;
+  font-weight: 600;
+  padding: 0;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ios-collapse-wrapper .collapse:hover,
+.ios-collapse-wrapper .collapse:focus-visible {
+  background: var(--smw-card-selected, rgba(255, 255, 255, 0.15));
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  transform: scale(1.05);
+  outline: none;
+}
+
+.ios-collapse-wrapper span.collapse {
+  visibility: hidden;
+  min-width: 28px;
+}
+
+.collapse {
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.ios-row-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ios-count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--smw-muted-text);
+  text-transform: uppercase;
+  min-width: 60px;
+}
+
+.ios-count-value {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--smw-due-color);
+  text-shadow: var(--smw-text-shadow, 0 1px 1px rgba(0, 0, 0, 0.15));
+}
+
+.ios-count-new .ios-count-value {
+  color: var(--smw-new-color);
+}
+
+.ios-count-zero {
+  opacity: 0.35;
+}
+
+.ios-count-label {
+  margin-top: 2px;
+}
+
+.ios-gear-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--smw-toggle-border);
+  background: var(--smw-toggle-bg);
+  color: var(--smw-text-color);
+  font-size: 16px;
+  padding: 0;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.1s ease, box-shadow 0.15s ease;
+}
+
+.ios-gear-btn:hover,
+.ios-gear-btn:focus-visible {
+  background: var(--smw-card-selected, rgba(255, 255, 255, 0.15));
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  outline: none;
+}
+
+.ios-chevron {
+  display: none;
+}
+
+.drag-hover .apple-glass {
+  background: var(--smw-card-selected);
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  background-color: var(--smw-tooltip-bg);
+  color: var(--smw-tooltip-text);
+  text-align: center;
+  padding: 5px 8px;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 10;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+/* Subtle dark-mode selection (no bright strip) */
+body.nightMode tr.deck.current td.decktd {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Dark mode hover exact same colour as the card widgets */
+body.nightMode .apple-glass:hover {
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(35, 35, 35, 0.90),
+      rgba(35, 35, 35, 0.80)
+    ) !important;
+
+  border-color: rgba(255, 255, 255, 0.10) !important;
+
+  box-shadow:
+    0 8px 14px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+
+  transform: translateY(-1px) scale(1.005);
+  filter: brightness(1.03);
+}, do you see this is support to make the body 
