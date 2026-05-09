@@ -1,0 +1,11 @@
+{
+  "name": "8BitDo Micro Anki Controller",
+  "homepage": "https://github.com/roxgib/anki-contanki",
+  "human_version": "v1.0.2",
+  "mod": 1709256169,
+  "min_point_version": 66,
+  "max_point_version": 231201,
+  "branch_index": 1,
+  "disabled": false,
+  "config": {}
+}
